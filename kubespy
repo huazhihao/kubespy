@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+#
+# kubespy is a non-invasive debugging tool for kubernetes
+
+# Copyright © 2019 Hua Zhihao <ihuazhihao@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[[ -n $DEBUG ]] && set -x
+
+set -eou pipefail
+IFS=$'\n\t'
+
+usage() {
+  local SELF
+  SELF="kubespy"
+  if [[ "$(basename "$0")" == kubectl-* ]]; then
+    SELF="kubectl spy"
+  fi
+
+  cat <<EOF
+Load common system tools into a particular running pod for debugging
+
+Usage:
+
+  $SELF POD [-c CONTAINER] [--spy SPY_IMAGE]
+
+Examples:
+
+  # spy the first container nginx from mypod
+  $SELF mypod
+
+  # sspy container nginx from mypod
+  $SELF mypod -c nginx
+
+  # spy container nginx from mypod using busybox
+  $SELF mypod -c nginx --spy busybox
+EOF
+}
+
+exit_err() {
+   echo >&2 "${1}"
+   exit 1
+}
+
+main() {
+  [ $# -eq 0 ] && exit_err "You must specify a pod for spying"
+
+  while [ $# -gt 0 ]; do
+      case "$1" in
+          -h | --help)
+              usage
+              exit
+              ;;
+          -c | --container)
+              co="$2"
+              shift
+              shift
+              ;;
+          --spy)
+              si="$2"
+              shift
+              shift
+              ;;
+          *)
+              po="$1"
+              shift
+              ;;
+      esac
+  done
+
+  co=${co:-""}
+  si=${si:-"busybox:latest"}
+
+  spyid="spy-$(shuf -i 1000-9999 -n 1)"
+  kubectl delete po/"${spyid}" &>/dev/null || true
+
+  no=$(kubectl get pod "${po}" -o "jsonpath={.spec.nodeName}") || exit_err "cannot found Pod ${po}'s nodeName"
+  if [[ "${co}" == "" ]]; then
+    cid=$(kubectl get pod "${po}" -o='jsonpath={.status.containerStatuses[0].containerID}' | sed 's/docker:\/\///')
+  else
+    cid=$(kubectl get pod "${po}" -o='jsonpath={.status.containerStatuses[?(@.name=="'"${co}"'")].containerID}' | sed 's/docker:\/\///')
+  fi
+
+  echo "loading spy pod..."
+  kubectl run --rm --tty -i --overrides='
+  {
+    "spec": {
+      "hostNetwork": true,
+      "hostPID": true,
+      "hostIPC": true,
+      "nodeName": "'"${no}"'",
+      "containers": [
+        {
+          "name": "spy",
+          "image": "'"${si}"'",
+          "command": [ "/bin/chroot", "/host"],
+          "args": [
+            "docker",
+            "run",
+            "-it",
+            "--network=container:'"${cid}"'",
+            "--pid=container:'"${cid}"'",
+            "--ipc=container:'"${cid}"'",
+            "busybox"
+          ],
+          "stdin": true,
+          "stdinOnce": true,
+          "tty": true,
+          "volumeMounts": [
+            {
+              "mountPath": "/host",
+              "name": "node"
+            }
+          ]
+        }
+      ],
+      "volumes": [
+        {
+          "name": "node",
+          "hostPath": {
+            "path": "/"
+          }
+        }
+      ]
+    }
+  }
+  ' --image=busybox --restart=Never "${spyid}" -- /bin/sh
+}
+
+main "$@"
