@@ -1,2 +1,12 @@
 script:
-  - shellcheck kubespy
+- shellcheck kubespy
+before_deploy: tar -czvf kubespy.tar.gz kubespy
+deploy:
+  provider: releases
+  api_key:
+    secure: 16HRYjwOYJCCHvv7pnpCqXYUEx+QhXYTCNl5XO3Wm//5ZnUQl+xknXwEbb7NhB756QsJ8o5FAgwGO+acHvMF74EviCqN3Sp/eRx6b62orzqD+8ylW5DvRNL3iV7t3rh37527kdp2FkcEWtP9QRqTIg+gpOM6axcjfqvrajbxpsuFTbF8hMAteMUfYQffjrFXElSdwKaGkn3nGsMr/055qtvWJ67l3IkyFoy7Yb+v6T3CzVfXjJ28AH5l+vI7ShmFZiC2CKm9TfrhnvrDwNXjDBHJ8S2K71n5/MJCp5Cr9E7NP3cWhCLtgE+K7KzmsaVmo/hKkfSAp939+Fm/IMZeMOwC9Owduxg55wDAE8wX3sxft7tNAP64wEUql9O62Mnn5Asst79DscM32+8kXSaovGv9tqBxL5+ZbbAyGq+NuV6tgCiFZZdhnKl58Arsi/KJ1juWty2Dx6wZUiF5jcZcYUSK0pJsxR42tcnj9Ann5ZSnHAz8Yo3iTvOfKEeHkdCGq/1y3evsXyxEOo3sknSbKAOSjHdZlO5UBMbvCRXeHCvuTrUp2kXcr+JKzF7br4KWKtt3WDJnp5w9/Z2iI+43MIrc629qK//7SF92XOWRHrkzWdJEImONhuwkbTStuLydkTLHOhO29eR8Q9I6GdshKMmMzisnY+KNZQuArIKRWjQ=
+  file: kubespy.tar.gz
+  draft: true
+  skip_cleanup: true
+  on:
+    tags: true
