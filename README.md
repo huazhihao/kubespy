@@ -24,18 +24,18 @@ Load common system tools into a particular running pod for debugging
 
 Usage:
 
-  kubespy POD [-c CONTAINER] [--spy SPY_IMAGE]
+  kubectl spy POD [-c CONTAINER] [--spy SPY_IMAGE]
 
 Examples:
 
   # spy the first container nginx from mypod
-  kubespy mypod
+  kubectl spy mypod
 
   # sspy container nginx from mypod
-  kubespy mypod -c nginx
+  kubectl spy mypod -c nginx
 
   # spy container nginx from mypod using busybox
-  kubespy mypod -c nginx --spy busybox
+  kubectl spy mypod -c nginx --spy busybox
 ```
 
 ## Architecture

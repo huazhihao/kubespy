@@ -45,6 +45,8 @@ Examples:
 
   # spy container nginx from mypod using busybox
   $SELF mypod -c nginx --spy busybox
+
+See https://github.com/huazhihao/kubespy for more details.
 EOF
 }
 
