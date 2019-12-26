@@ -1,7 +1,7 @@
 # kubespy: non-invasive debugging tool for kubernetes
 
 [![Build Status](https://travis-ci.org/huazhihao/kubespy.svg?branch=master)](https://travis-ci.org/huazhihao/kubespy)
-[![GoDoc](https://godoc.org/github.com/huazhihao/kubespy?status.svg)](https://godoc.org/github.com/huazhihao/kubespy)
+![Proudly written in Bash](https://img.shields.io/badge/written%20in-bash-ff69b4.svg)
 
 `kubespy` is a kubectl plugin which can non-invasively load common system tools into a particular running pod for debugging. So you don't have to modify the spec of the pod or the image of the container just for debugging purpose.
 
@@ -31,7 +31,7 @@ Examples:
   # spy the first container nginx from mypod
   kubectl spy mypod
 
-  # sspy container nginx from mypod
+  # spy container nginx from mypod
   kubectl spy mypod -c nginx
 
   # spy container nginx from mypod using busybox
