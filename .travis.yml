@@ -1,6 +1,6 @@
 script:
 - shellcheck kubespy
-before_deploy: tar -czvf kubespy.tar.gz kubespy
+before_deploy: tar -czvf kubespy.tar.gz kubespy LICENSE
 deploy:
   provider: releases
   api_key:
