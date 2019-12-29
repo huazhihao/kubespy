@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/huazhihao/kubespy.svg?branch=master)](https://travis-ci.org/huazhihao/kubespy)
 ![Proudly written in Bash](https://img.shields.io/badge/written%20in-bash-ff69b4.svg)
 
-`kubespy` is a kubectl plugin which can non-invasively load common system tools into a particular running pod for debugging. So you don't have to modify the spec of the pod or the image of the container just for debugging purpose.
+`kubespy` is a kubectl plugin which creates and runs an ephemeral toolbox container mounting on the pid/net/ipc namespace of a particular pod for debugging during runtime. So you don't have to bundle the tools with your image just for debugging purpose.
 
 
 ## Examples
@@ -24,7 +24,7 @@ Load common system tools into a particular running pod for debugging
 
 Usage:
 
-  kubectl spy POD [-c CONTAINER] [--spy SPY_IMAGE]
+  kubectl spy POD [-c CONTAINER] [--ephemeral TOOLBOX_IMAGE]
 
 Examples:
 
@@ -35,7 +35,7 @@ Examples:
   kubectl spy mypod -c nginx
 
   # spy container nginx from mypod using busybox
-  kubectl spy mypod -c nginx --spy busybox
+  kubectl spy mypod -c nginx --ephemeral busybox
 ```
 
 ## Architecture
@@ -56,7 +56,7 @@ worker node:   kubelet
                docker runtime
                     | (run)
                     v
-               sidecar container
+               ephemeral container
                     | (share namespace: pid/net/ipc)
                     v
                target pod (eg. nginx)

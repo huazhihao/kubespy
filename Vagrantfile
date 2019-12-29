@@ -25,10 +25,10 @@ Vagrant.configure("2") do |config|
     minikube version
 
     curl -fsSL https://get.docker.com | sh
-    usermod -aG docker vagrant
+    usermod -aG docker $USER
 
-    minikube start --extra-config=apiserver.authorization-mode=RBAC --insecure-registry 0.0.0.0/ --vm-driver=none --apiserver-ips 127.0.0.1 --apiserver-name localhost
-
+    minikube start  --vm-driver=none
+    mv /home/vagrant/.kube /home/vagrant/.minikube $HOME
     chown -R $USER $HOME/.kube $HOME/.minikube
   SHELL
 end
