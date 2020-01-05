@@ -1,41 +1,41 @@
-# kubespy: non-invasive debugging tool for kubernetes
+# kubespy: pod debugging tool for kubernetes with docker runtimes
 
 [![Build Status](https://travis-ci.org/huazhihao/kubespy.svg?branch=master)](https://travis-ci.org/huazhihao/kubespy)
 ![Proudly written in Bash](https://img.shields.io/badge/written%20in-bash-ff69b4.svg)
 
-`kubespy` is a kubectl plugin which creates and runs an ephemeral toolbox container mounting on the pid/net/ipc namespace of a particular pod for debugging during runtime. So you don't have to bundle the tools with your image just for debugging purpose.
+`kubespy` is a kubectl plugin implemented in bash to debug a application pod by creating and running an temporary `spy container` to join its docker namespace(eg. pid/net/ipc). You can specify the image of this temporary spy container which is supposed to include all the debug tools required, so you don't have to unnecessarily bundle those tools with the application image.
 
+Compared to another plugin [kubectl-debug](https://github.com/verb/kubectl-debug), `kubespy` doesn't require the prerequisites of 1. `EphemeralContainers` to be enabled in the cluster 2. `shareProcessNamespace` to be enabled for the application pod. `EphemeralContainers` is still in early alpha state and is not suitable for production clusters. And modifying the spec of `shareProcessNamespace` will destroy the original application pod and the evidences inside as well.
 
-## Examples
-
-[![asciicast](https://asciinema.org/a/290096.svg)](https://asciinema.org/a/290096)
+Meanwhile `kubespy` has its prerequisite - the node that hosting the application pod needs to run on a docker runtime with admin privileges.
 
 ## Installation
 
 ```sh
-curl -so kubectl-spy https://raw.githubusercontent.com/huazhihao/kubespy/master/kubespy
-sudo install kubectl-spy /usr/local/bin/
+$ curl -so kubectl-spy https://raw.githubusercontent.com/huazhihao/kubespy/master/kubespy
+$ sudo install kubectl-spy /usr/local/bin/
 ```
 
 ## Usage
 
+```sh
+$ kubectl spy POD [-c CONTAINER] [--spy-image SPY_IMAGE]
 ```
-Load common system tools into a particular running pod for debugging
 
-Usage:
 
-  kubectl spy POD [-c CONTAINER] [--ephemeral TOOLBOX_IMAGE]
+## Examples:
 
-Examples:
+[![asciicast](https://asciinema.org/a/290096.svg)](https://asciinema.org/a/290096)
 
-  # spy the first container nginx from mypod
-  kubectl spy mypod
+```sh
+# debug the first container nginx from mypod
+$kubectl spy mypod
 
-  # spy container nginx from mypod
-  kubectl spy mypod -c nginx
+# debug container nginx from mypod
+$ kubectl spy mypod -c nginx
 
-  # spy container nginx from mypod using busybox
-  kubectl spy mypod -c nginx --ephemeral busybox
+# debug container nginx from mypod using busybox
+$ kubectl spy mypod -c nginx --spy-image busybox
 ```
 
 ## Architecture
@@ -56,8 +56,8 @@ worker node:   kubelet
                docker runtime
                     | (run)
                     v
-               ephemeral container
-                    | (share namespace: pid/net/ipc)
+               spy container
+                    | (join docker namespace: pid/net/ipc)
                     v
-               target pod (eg. nginx)
+               application pod (eg. nginx)
 ```

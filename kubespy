@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# kubespy is a non-invasive debugging tool for kubernetes
+# pod debugging tool for kubernetes with docker runtimes
 
 # Copyright © 2019 Hua Zhihao <ihuazhihao@gmail.com>
 #
@@ -29,24 +29,23 @@ usage() {
   fi
 
   cat <<EOF
-Load common system tools into a particular running pod for debugging
+kubespy is a debugging tool for kubernetes with docker runtimes
 
 Usage:
 
-  $SELF POD [-c CONTAINER] [--ephemeral SPY_IMAGE]
+  $SELF POD [-c CONTAINER] [--spy-image SPY_IMAGE]
 
 Examples:
 
-  # spy the first container nginx from mypod
+  # debug the first container nginx from mypod
   $SELF mypod
 
-  # sspy container nginx from mypod
+  # debug container nginx from mypod
   $SELF mypod -c nginx
 
-  # spy container nginx from mypod using busybox
-  $SELF mypod -c nginx --ephemeral busybox
+  # debug container nginx from mypod using busybox
+  $SELF mypod -c nginx --spy-image busybox
 
-See https://github.com/huazhihao/kubespy for more details.
 EOF
 }
 
@@ -69,7 +68,7 @@ main() {
               shift
               shift
               ;;
-          --ephemeral)
+          --spy-image)
               ep="$2"
               shift
               shift
