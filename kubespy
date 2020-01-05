@@ -95,7 +95,7 @@ main() {
   fi
 
   echo "loading spy pod..."
-  kubectl run --rm --tty -i --overrides='
+  kubectl run --rm --tty -i --generator=run-pod/v1 --overrides='
   {
     "spec": {
       "hostNetwork": true,
