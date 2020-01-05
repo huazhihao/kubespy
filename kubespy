@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# pod debugging tool for kubernetes with docker runtimes
+# pod debugging tool for kubernetes clusters with docker runtimes
 
 # Copyright © 2019 Hua Zhihao <ihuazhihao@gmail.com>
 #
@@ -29,7 +29,7 @@ usage() {
   fi
 
   cat <<EOF
-kubespy is a debugging tool for kubernetes with docker runtimes
+kubespy is a pod debugging tool for kubernetes clusters with docker runtimes
 
 Usage:
 
