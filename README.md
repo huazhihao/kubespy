@@ -1,4 +1,4 @@
-# kubespy: pod debugging tool for kubernetes with docker runtimes
+# kubespy
 
 [![Build Status](https://travis-ci.org/huazhihao/kubespy.svg?branch=master)](https://travis-ci.org/huazhihao/kubespy)
 ![Proudly written in Bash](https://img.shields.io/badge/written%20in-bash-ff69b4.svg)
