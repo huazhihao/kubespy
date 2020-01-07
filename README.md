@@ -7,7 +7,7 @@
 
 Unlike [kubectl-debug](https://github.com/verb/kubectl-debug), `kubespy` doesn't require the prerequisites of 1. `EphemeralContainers` to be enabled in the cluster 2. `shareProcessNamespace` to be enabled for the application pod. The reasons are 1. `EphemeralContainers` is still in early alpha state and is not suitable for production clusters 2. modifying the spec of `shareProcessNamespace` will destroy the original application pod as well as the evidences inside.
 
-Meanwhile `kubespy` has its prerequisite - the node that hosting the application pod needs to run on a docker runtime with admin privileges.
+Meanwhile `kubespy` has its prerequisite - the node hosting the application pod needs to run on a docker runtime with admin privileges.
 
 ## Installation
 
@@ -29,7 +29,7 @@ $ kubectl spy POD [-c CONTAINER] [--spy-image SPY_IMAGE]
 
 ```sh
 # debug the first container nginx from mypod
-$kubectl spy mypod
+$ kubectl spy mypod
 
 # debug container nginx from mypod
 $ kubectl spy mypod -c nginx
