@@ -3,11 +3,11 @@
 [![Build Status](https://travis-ci.org/huazhihao/kubespy.svg?branch=master)](https://travis-ci.org/huazhihao/kubespy)
 ![Proudly written in Bash](https://img.shields.io/badge/written%20in-bash-ff69b4.svg)
 
-`kubespy` is a kubectl plugin implemented in bash to debug a application pod during runtime by creating and running an temporary `spy container` to join its docker namespace(eg. pid/net/ipc). You can specify the image of `spy container` which should include all the debug tools required and can load them into the debugging environment, so you don't have to unnecessarily bundle those debug tools with the application pod image.
+`kubespy` is a kubectl plugin implemented in bash to debug a running pod. It starts a temporary `spy container` which joins the namespaces of the target container (eg. pid/net/ipc). You can specify the image of `spy container` which should include all the required debugging tools. Thus, the debugging tools need not unnecessarily be bundled with the main application container image.
 
-Unlike [kubectl-debug](https://github.com/verb/kubectl-debug), `kubespy` doesn't require the prerequisites of 1. `EphemeralContainers` to be enabled in the cluster 2. `shareProcessNamespace` to be enabled for the application pod. The reasons are 1. `EphemeralContainers` is still in early alpha state and is not suitable for production clusters 2. modifying the spec of `shareProcessNamespace` will destroy the original application pod as well as the evidences inside.
+`kubespy` is similar to [kubectl-debug](https://github.com/verb/kubectl-debug). In contrast to the latter, kubespy works without the EphemeralContainers feature which is an experimental alpha feature and needs to be activated per pod.
 
-Meanwhile `kubespy` has its prerequisite - the node hosting the application pod needs to run on a docker runtime with admin privileges.
+Meanwhile `kubespy` has its prerequisites - the cluster must use docker as container runtime and you need to be able to run privileged pods.
 
 ## Installation
 
@@ -21,7 +21,6 @@ $ sudo install kubectl-spy /usr/local/bin/
 ```sh
 $ kubectl spy POD [-c CONTAINER] [--spy-image SPY_IMAGE]
 ```
-
 
 ## Examples:
 
