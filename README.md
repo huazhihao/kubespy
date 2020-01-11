@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/huazhihao/kubespy.svg?branch=master)](https://travis-ci.org/huazhihao/kubespy)
 ![Proudly written in Bash](https://img.shields.io/badge/written%20in-bash-ff69b4.svg)
+[![LICENSE](https://img.shields.io/github/license/huazhihao/kubespy.svg)](https://github.com/huazhihao/kubespy/blob/master/LICENSE)
+[![Releases](https://img.shields.io/github/v/release/huazhihao/kubespy.svg)](https://github.com/huazhihao/kubespy/releases)
 
 `kubespy` is a kubectl plugin implemented in bash to debug a running pod. It starts a temporary `spy container` which joins the namespaces of the target container (eg. pid/net/ipc). You can specify the image of `spy container` which should include all the required debugging tools. Thus, the debugging tools need not unnecessarily be bundled with the main application container image.
 
@@ -11,9 +13,19 @@ Meanwhile `kubespy` has its prerequisites - the cluster must use docker as conta
 
 ## Installation
 
+You can install either from source or with `krew`
+
+### Install from source
+
 ```sh
 $ curl -so kubectl-spy https://raw.githubusercontent.com/huazhihao/kubespy/master/kubespy
 $ sudo install kubectl-spy /usr/local/bin/
+```
+
+### Install with `krew`
+
+```sh
+$ kubectl krew install spy
 ```
 
 ## Usage
