@@ -1,5 +1,7 @@
 # kubespy 用bash实现的k8s动态调试工具
 
+原文位于 https://github.com/huazhihao/kubespy/blob/master/implement-a-k8s-debug-plugin-in-bash.md
+
 ## 背景
 
 Kubernetes调试的最大痛点是精简过的容器镜像里没有日常的调试工具。背后的原因是精简容器镜像本身就是容器技术的最佳实践之一。nginx的容器镜像甚至不包含ps和curl这种最基础的工具。这种完全服务于生产环境的策略无异于过早优化，但受制于immutable infrastructure的基本思想和CI/CD实际操作的双重制约，你无法在生产环境发布一个和开发环境不同的容器镜像。这使得这一过早优化的结果更加灾难化。解决这个问题的关键在于，能否在不侵入式的修改容器镜像的情况下，向目标容器里加载需要的调试工具。例如，类似于istio之类的解决方案可以向目标pod插入一个sidecar容器。当然这里的权限要求是高于sidecar容器的，因为pod中的各个容器虽然共享network，但pid和ipc是不共享的。此外,sidecar容器是无法被加入一个已经创建出来的pod，而我们希望工具容器可以在运行时被动态插入，因为问题的产生是随机的，你不能完全预测需要加载哪些工具。
@@ -65,13 +67,13 @@ worker node:   kubelet [3]
 
 概要的看，`kubespy`是通过以下这些步骤构建调试连的，上图的步骤数字可以与下文对应
 
-[1] `kubespy`作为`kubectl`的插件被执行，可以向`master node`上的`kube-apiserver`发出api请求,会先取得目标容器的关键信息，如其所在的`worker node`和pid/net/ipc 等cgroups namespace
-[2] `kube-apiserver`将具体的命令分发给目标容器所在的`worker node`上的agent`kubelet`执行
-[3] `kubelet`创建一个`busybox`作为`spy pod`
-[4] `spy pod`mount了`worker node`的根目录，并通过`chroot`取得了worker node的控制权
-[5] `spy pod`控制了docker cli创建了工具容器(`spy container `)
-[6] 工具容器被加入目标容器的pid/net/ipc等cgroups namespace
-[7] 用户通过`kubectl`被attach到工具容器的tty里，可以对目标容器进行调试甚至是修改
+    [1] `kubespy`作为`kubectl`的插件被执行，可以向`master node`上的`kube-apiserver`发出api请求,会先取得目标容器的关键信息，如其所在的`worker node`和pid/net/ipc 等cgroups namespace
+    [2] `kube-apiserver`将具体的命令分发给目标容器所在的`worker node`上的agent`kubelet`执行
+    [3] `kubelet`创建一个`busybox`作为`spy pod`
+    [4] `spy pod`mount了`worker node`的根目录，并通过`chroot`取得了worker node的控制权
+    [5] `spy pod`控制了docker cli创建了工具容器(`spy container `)
+    [6] 工具容器被加入目标容器的pid/net/ipc等cgroups namespace
+    [7] 用户通过`kubectl`被attach到工具容器的tty里，可以对目标容器进行调试甚至是修改
 
 ## 关键代码
 
