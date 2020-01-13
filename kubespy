@@ -33,7 +33,7 @@ kubespy is a pod debugging tool for kubernetes clusters with docker runtimes
 
 Usage:
 
-  $SELF POD [-c CONTAINER] [--spy-image SPY_IMAGE]
+  $SELF POD [-c CONTAINER] [--spy-image SPY_IMAGE] [ --namespace NAMESPACE ]
 
 Examples:
 
@@ -45,6 +45,9 @@ Examples:
 
   # debug container nginx from mypod using busybox
   $SELF mypod -c nginx --spy-image busybox
+
+  # debug container nginx from mypod using busybox in namespace defalt
+  $SELF mypod -c nginx --spy-image busybox --namespace default
 
 EOF
 }
@@ -73,6 +76,11 @@ main() {
               shift
               shift
               ;;
+          --namespace)
+              ns="$2"
+              shift
+              shift
+              ;;
           *)
               po="$1"
               shift
@@ -82,19 +90,20 @@ main() {
 
   co=${co:-""}
   ep=${ep:-"busybox:latest"}
+  ns=${ns:-"default"}
 
   spyid="spy-$(shuf -i 1000-9999 -n 1)"
-  kubectl delete po/"${spyid}" &>/dev/null || true
+  kubectl -n ${ns} delete po/"${spyid}" &>/dev/null || true
 
-  no=$(kubectl get pod "${po}" -o "jsonpath={.spec.nodeName}") || exit_err "cannot found Pod ${po}'s nodeName"
+  no=$(kubectl -n ${ns} get pod "${po}" -o "jsonpath={.spec.nodeName}") || exit_err "cannot found Pod ${po}'s nodeName"
   if [[ "${co}" == "" ]]; then
-    cid=$(kubectl get pod "${po}" -o='jsonpath={.status.containerStatuses[0].containerID}' | sed 's/docker:\/\///')
+    cid=$(kubectl -n ${ns} get pod "${po}" -o='jsonpath={.status.containerStatuses[0].containerID}' | sed 's/docker:\/\///')
   else
-    cid=$(kubectl get pod "${po}" -o='jsonpath={.status.containerStatuses[?(@.name=="'"${co}"'")].containerID}' | sed 's/docker:\/\///')
+    cid=$(kubectl -n ${ns} get pod "${po}" -o='jsonpath={.status.containerStatuses[?(@.name=="'"${co}"'")].containerID}' | sed 's/docker:\/\///')
   fi
 
   echo "loading spy pod..."
-  kubectl run --rm --tty -i --generator=run-pod/v1 --overrides='
+  kubectl -n ${ns} run --rm --tty -i --generator=run-pod/v1 --overrides='
   {
     "spec": {
       "hostNetwork": true,
