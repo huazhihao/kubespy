@@ -27,8 +27,9 @@ Vagrant.configure("2") do |config|
     curl -fsSL https://get.docker.com | sh
     usermod -aG docker $USER
 
-    minikube start  --vm-driver=none
-    mv /home/vagrant/.kube /home/vagrant/.minikube $HOME
-    chown -R $USER $HOME/.kube $HOME/.minikube
+    minikube start --vm-driver=none
+    mv /root/.kube /root/.minikube /home/vagrant/
+    chown -R vagrant:vagrant /home/vagrant/.kube /home/vagrant/.minikube
+    sed -i 's!/root/.minikube/!/home/vagrant/.minikube/!g' /home/vagrant/.kube/config
   SHELL
 end
