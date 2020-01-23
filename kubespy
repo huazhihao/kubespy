@@ -92,17 +92,17 @@ main() {
   ep=${ep:-"busybox:latest"}
 
   spyid="spy-$(shuf -i 1000-9999 -n 1)"
-  kubectl -n ${ns} delete po/"${spyid}" &>/dev/null || true
+  kubectl -n "${ns}" delete po/"${spyid}" &>/dev/null || true
 
-  no=$(kubectl -n ${ns} get pod "${po}" -o "jsonpath={.spec.nodeName}") || exit_err "cannot found Pod ${po}'s nodeName"
+  no=$(kubectl -n "${ns}" get pod "${po}" -o "jsonpath={.spec.nodeName}") || exit_err "cannot found Pod ${po}'s nodeName"
   if [[ "${co}" == "" ]]; then
-    cid=$(kubectl -n ${ns} get pod "${po}" -o='jsonpath={.status.containerStatuses[0].containerID}' | sed 's/docker:\/\///')
+    cid=$(kubectl -n "${ns}" get pod "${po}" -o='jsonpath={.status.containerStatuses[0].containerID}' | sed 's/docker:\/\///')
   else
-    cid=$(kubectl -n ${ns} get pod "${po}" -o='jsonpath={.status.containerStatuses[?(@.name=="'"${co}"'")].containerID}' | sed 's/docker:\/\///')
+    cid=$(kubectl -n "${ns}" get pod "${po}" -o='jsonpath={.status.containerStatuses[?(@.name=="'"${co}"'")].containerID}' | sed 's/docker:\/\///')
   fi
 
   echo "loading spy pod..."
-  kubectl -n ${ns} run --rm --tty -i --generator=run-pod/v1 --overrides='
+  kubectl -n "${ns}" run --rm --tty -i --generator=run-pod/v1 --overrides='
   {
     "spec": {
       "hostNetwork": true,
