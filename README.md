@@ -31,7 +31,7 @@ $ kubectl krew install spy
 ## Usage
 
 ```sh
-$ kubectl spy POD [-c CONTAINER] [--spy-image SPY_IMAGE]
+$ kubectl spy POD [-c CONTAINER] [-n NAMESPACE] [--spy-image SPY_IMAGE]
 ```
 
 ## Examples:
