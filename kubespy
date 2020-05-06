@@ -130,6 +130,7 @@ main() {
           "--pid=container:${cid}",
           "--ipc=container:${cid}",
           "--entrypoint=${entrypnt}",
+          "--volumes-from=${cid}",
           "${ep}"
         ],
         "stdin": true,
