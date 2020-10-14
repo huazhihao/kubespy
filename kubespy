@@ -46,6 +46,12 @@ Examples:
   # debug container nginx from mypod using busybox
   $SELF mypod -c nginx --spy-image busybox
 
+  # debug container nginx with special user
+  $SELF mypod -c nginx -u www-data
+
+  # debug container nginx with privileged, so strace and pmap can be used.
+  $SELF mypod -c nginx -p
+
 EOF
 }
 
@@ -78,6 +84,15 @@ main() {
               shift
               shift
               ;;
+          -u | --user)
+              user="$2"
+              shift
+              shift
+              ;;
+          -p | --privileged)
+              privileged="yes"
+              shift
+              ;;
           *)
               po="$1"
               shift
@@ -88,6 +103,8 @@ main() {
   co=${co:-""}
   ns=${ns:-"$(kubectl config view --minify -o 'jsonpath={..namespace}')"}
   ns=${ns:-"default"}
+  privileged=${privileged:-"no"}
+  user=${user:-"root"}
 
   ep=${ep:-"busybox:latest"}
 
@@ -118,9 +135,16 @@ main() {
             "docker",
             "run",
             "-it",
+            "--rm",
             "--network=container:'"${cid}"'",
             "--pid=container:'"${cid}"'",
             "--ipc=container:'"${cid}"'",
+            "--user='"${user}"'",
+            '$(
+              if [[ "$privileged" == "yes" ]]; then
+                echo '"--privileged",'
+              fi
+            )'
             "'"${ep}"'"
           ],
           "stdin": true,
