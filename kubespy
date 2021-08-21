@@ -119,7 +119,7 @@ main() {
     "containers": [
       {
         "name": "spy",
-        "image": "docker.io/busybox",
+        "image": "docker.io/busybox:latest",
         "command": [ "/bin/chroot", "/host"],
         "args": [
           "docker",
@@ -157,7 +157,7 @@ EOT
 )"
 
   echo "loading spy pod..."
-  kubectl -n "${ns}" run --rm -ti --image="docker.io/busybox" --overrides="${overrides}" --restart=Never "${spyid}" -- /bin/sh
+  kubectl -n "${ns}" run --rm -ti --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}"
 }
 
 main "$@"
