@@ -46,6 +46,9 @@ Examples:
   # debug container nginx from mypod using busybox
   $SELF mypod -c nginx --spy-image busybox
 
+  # debug container nginx from mypod using busybox with specified entrypoint
+  $SELF mypod -c nginx --spy-image busybox --entrypoint /bin/sh
+
 EOF
 }
 
@@ -78,6 +81,11 @@ main() {
               shift
               shift
               ;;
+          --entrypoint)
+              entrypnt="$2"
+              shift
+              shift
+              ;;
           *)
               po="$1"
               shift
@@ -86,10 +94,10 @@ main() {
   done
 
   co=${co:-""}
-  ns=${ns:-"$(kubectl config view --minify -o 'jsonpath={..namespace}')"}
+  # ns=${ns:-"$(kubectl config view --minify -o 'jsonpath={..namespace}')"}
   ns=${ns:-"default"}
-
-  ep=${ep:-"busybox:latest"}
+  ep=${ep:-"docker.io/busybox:latest"}
+  entrypnt=${entrypnt:-"/bin/sh"}
 
   spyid="spy-$(shuf -i 1000-9999 -n 1)"
   kubectl -n "${ns}" delete po/"${spyid}" &>/dev/null || true
@@ -101,50 +109,56 @@ main() {
     cid=$(kubectl -n "${ns}" get pod "${po}" -o='jsonpath={.status.containerStatuses[?(@.name=="'"${co}"'")].containerID}' | sed 's/docker:\/\///')
   fi
 
-  echo "loading spy pod..."
-  kubectl -n "${ns}" run --rm --tty -i --generator=run-pod/v1 --overrides='
-  {
-    "spec": {
-      "hostNetwork": true,
-      "hostPID": true,
-      "hostIPC": true,
-      "nodeName": "'"${no}"'",
-      "containers": [
-        {
-          "name": "spy",
-          "image": "busybox",
-          "command": [ "/bin/chroot", "/host"],
-          "args": [
-            "docker",
-            "run",
-            "-it",
-            "--network=container:'"${cid}"'",
-            "--pid=container:'"${cid}"'",
-            "--ipc=container:'"${cid}"'",
-            "'"${ep}"'"
-          ],
-          "stdin": true,
-          "stdinOnce": true,
-          "tty": true,
-          "volumeMounts": [
-            {
-              "mountPath": "/host",
-              "name": "node"
-            }
-          ]
-        }
-      ],
-      "volumes": [
-        {
-          "name": "node",
-          "hostPath": {
-            "path": "/"
+  overrides="$(
+  cat <<EOT
+{
+  "spec": {
+    "hostNetwork": true,
+    "hostPID": true,
+    "hostIPC": true,
+    "nodeName": "${no}",
+    "containers": [
+      {
+        "name": "spy",
+        "image": "docker.io/busybox",
+        "command": [ "/bin/chroot", "/host"],
+        "args": [
+          "docker",
+          "run",
+          "-it",
+          "--network=container:${cid}",
+          "--pid=container:${cid}",
+          "--ipc=container:${cid}",
+          "--entrypoint=${entrypnt}",
+          "--volumes-from=${cid}",
+          "${ep}"
+        ],
+        "stdin": true,
+        "stdinOnce": true,
+        "tty": true,
+        "volumeMounts": [
+          {
+            "mountPath": "/host",
+            "name": "node"
           }
+        ]
+      }
+    ],
+    "volumes": [
+      {
+        "name": "node",
+        "hostPath": {
+          "path": "/"
         }
-      ]
-    }
+      }
+    ]
   }
-  ' --image=busybox --restart=Never "${spyid}" -- /bin/sh
+}
+EOT
+)"
+
+  echo "loading spy pod..."
+  kubectl -n "${ns}" run --rm -ti --image="docker.io/busybox" --overrides="${overrides}" --restart=Never "${spyid}" --generator=run-pod/v1 -- /bin/sh
 }
 
 main "$@"
