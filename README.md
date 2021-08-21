@@ -5,11 +5,11 @@
 [![LICENSE](https://img.shields.io/github/license/huazhihao/kubespy.svg)](https://github.com/huazhihao/kubespy/blob/master/LICENSE)
 [![Releases](https://img.shields.io/github/v/release/huazhihao/kubespy.svg)](https://github.com/huazhihao/kubespy/releases)
 
-`kubespy` is a kubectl plugin implemented in bash to debug a running pod. It starts a temporary `spy container` which joins the namespaces of the target container (eg. pid/net/ipc). You can specify the image of `spy container` which should include all the required debugging tools. Thus, the debugging tools need not unnecessarily be bundled with the main application container image.
+`kubespy` is a kubectl plugin to debug a running pod without any prerequisites. It creates a short-lived `spy container`, which contains all the required debugging tools, to "spy" the target container by joining its namespaces. So the target container image can keep clean without sacrificing the convenience for debugging on demond.
 
 `kubespy` is similar to [kubectl-debug](https://github.com/verb/kubectl-debug). In contrast to the latter, kubespy works without the EphemeralContainers feature which is an experimental alpha feature and needs to be activated per pod.
 
-Meanwhile `kubespy` has its prerequisites - the cluster must use docker as container runtime and you need to be able to run privileged pods.
+Meanwhile `kubespy` has its own prerequisites - the cluster must use docker as container runtime and you need to be able to run privileged pods.
 
 ## Installation
 
@@ -47,9 +47,12 @@ $ kubectl spy mypod -c nginx
 
 # debug container nginx from mypod using busybox
 $ kubectl spy mypod -c nginx --spy-image busybox
+
+# debug container nginx from mypod using busybox with specified entrypoint
+$ kubectl spy mypod -c nginx --spy-image busybox --entrypoint /bin/sh
 ```
 
-## Architecture
+## Workflow
 
 ```
 local machine: kubectl spy
@@ -59,16 +62,10 @@ master node:   kube-apiserver
                     |
                     v
 worker node:   kubelet
-                    |
-                    v
-               spy pod (eg. busybox)
-                    | (chroot)
-                    v
-               docker runtime
-                    | (run)
+                    | create
                     v
                spy container
-                    | (join docker namespace: pid/net/ipc)
+                    | nsenter: pid/net/ipc/mount/uts
                     v
-               application pod (eg. nginx)
+               target container (eg. nginx)
 ```
