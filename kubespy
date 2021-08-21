@@ -98,15 +98,15 @@ main() {
   ep=${ep:-"docker.io/busybox:latest"}
   entrypnt=${entrypnt:-"/bin/sh"}
 
-  spyid="spy-$(shuf -i 1000-9999 -n 1)"
-  kubectl -n "${ns}" delete po/"${spyid}" &>/dev/null || true
-
   no=$(kubectl -n "${ns}" get pod "${po}" -o "jsonpath={.spec.nodeName}") || exit_err "cannot found Pod ${po}'s nodeName"
   if [[ "${co}" == "" ]]; then
     cid=$(kubectl -n "${ns}" get pod "${po}" -o='jsonpath={.status.containerStatuses[0].containerID}' | sed 's/docker:\/\///')
   else
     cid=$(kubectl -n "${ns}" get pod "${po}" -o='jsonpath={.status.containerStatuses[?(@.name=="'"${co}"'")].containerID}' | sed 's/docker:\/\///')
   fi
+
+  spyid="spy-${cid:0:12}"
+  kubectl -n "${ns}" delete po/"${spyid}" &>/dev/null || true
 
   overrides="$(
   cat <<EOT
