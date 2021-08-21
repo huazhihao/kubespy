@@ -157,7 +157,7 @@ EOT
 )"
 
   echo "loading spy pod..."
-  kubectl -n "${ns}" run --rm -ti --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}"
+  kubectl -n "${ns}" run --rm -i --tty --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}"
 }
 
 main "$@"

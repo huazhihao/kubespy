@@ -65,7 +65,7 @@ worker node:   kubelet
                     | create
                     v
                spy container
-                    | nsenter: pid/net/ipc/mount/uts
+                    | join namespace: pid/net/ipc/mount/uts
                     v
-               target container (eg. nginx)
+               target container
 ```
