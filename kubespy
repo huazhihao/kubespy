@@ -124,13 +124,18 @@ main() {
         "command": [ "/bin/chroot", "/host"],
         "args": [
           "docker",
-          "inspect",
-          "--format",
-          "'{{ .State.Pid }}'",
-          "${cid}"
+          "run",
+          "-it",
+          "--network=container:${cid}",
+          "--pid=container:${cid}",
+          "--ipc=container:${cid}",
+          "--entrypoint=${entrypnt}",
+          "--volumes-from=${cid}",
+          "${ep}"
         ],
         "stdin": true,
         "stdinOnce": true,
+        "tty": true,
         "volumeMounts": [
           {
             "mountPath": "/host",
@@ -152,37 +157,8 @@ main() {
 EOT
 )"
 
-  echo "loading spy pod for getting pid..."
-  pid=$(kubectl -n "${ns}" run --rm -i --quiet --image="docker.io/busybox" --overrides="${overrides}" --restart=Never "${spyid}" --generator=run-pod/v1 -- /bin/sh 2>/dev/null | tr -d \'\")
-
-  overrides="$(
-  cat <<EOT
-{
-  "spec": {
-    "nodeName": "${no}",
-    "hostNetwork": true,
-    "hostPID": true,
-    "hostIPC": true,
-    "containers": [
-      {
-        "securityContext": {
-          "privileged": true
-        },
-        "name": "spy",
-        "image": "${ep}",
-        "command": [ "nsenter", "--target", "${pid}", "--mount", "--uts", "--ipc", "--net", "--pid"],
-        "stdin": true,
-        "stdinOnce": true,
-        "tty": true
-      }
-    ]
-  }
-}
-EOT
-)"
-
   echo "loading spy pod..."
-  kubectl -n "${ns}" run --rm -ti --image="${ep}" --overrides="${overrides}" --restart=Never "${spyid}" --generator=run-pod/v1 -- "${entrypnt}"
+  kubectl -n "${ns}" run --rm -ti --image="docker.io/busybox" --overrides="${overrides}" --restart=Never "${spyid}" --generator=run-pod/v1 -- /bin/sh
 }
 
 main "$@"
