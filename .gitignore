@@ -2,3 +2,4 @@
 *.log
 bin/*
 spy.yaml
+draft/

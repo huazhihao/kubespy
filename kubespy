@@ -33,7 +33,7 @@ kubespy is a pod debugging tool for kubernetes clusters with docker runtimes
 
 Usage:
 
-  $SELF [-c CONTAINER] [-n NAMESPACE] [--spy-image IMAGE] [--p PORT] POD
+  $SELF [-c CONTAINER] [-n NAMESPACE] [--spy-image IMAGE] [-p PORT] POD
 
 Examples:
 
@@ -53,7 +53,7 @@ Examples:
   $SELF spy mypod --entrypoint /bin/sh
 
   # specify additional port to be exposed
-  $SELF spy mypod --p 2345
+  $SELF spy mypod -p 2345
 
 EOF
 }

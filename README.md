@@ -39,17 +39,23 @@ $ kubectl spy POD [-c CONTAINER] [-n NAMESPACE] [--spy-image SPY_IMAGE]
 [![asciicast](https://asciinema.org/a/290096.svg)](https://asciinema.org/a/290096)
 
 ```sh
-# debug the first container nginx from mypod
+# debug the primary (first) container in pod mypod
 $ kubectl spy mypod
 
-# debug container nginx from mypod
-$ kubectl spy mypod -c nginx
+# specify pod namespace
+$ kubectl spy mypod -n default
 
-# debug container nginx from mypod using busybox
-$ kubectl spy mypod -c nginx --spy-image busybox
+# specify debugee container
+$ kubectl spy mypod -c mycontainer
 
-# debug container nginx from mypod using busybox with specified entrypoint
-$ kubectl spy mypod -c nginx --spy-image busybox --entrypoint /bin/sh
+# specify spy-image
+$ kubectl spy mypod --spy-image busybox
+
+# specify entrypoint for interaction
+$ kubectl spy mypod --entrypoint /bin/sh
+
+# specify additional port to be exposed
+$ kubectl spy mypod -p 2345
 ```
 
 ## Workflow
