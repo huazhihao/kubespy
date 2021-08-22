@@ -33,21 +33,27 @@ kubespy is a pod debugging tool for kubernetes clusters with docker runtimes
 
 Usage:
 
-  $SELF POD [-c CONTAINER] [-n NAMESPACE] [--spy-image SPY_IMAGE]
+  $SELF [-c CONTAINER] [-n NAMESPACE] [--spy-image IMAGE] [--p PORT] POD
 
 Examples:
 
-  # debug the first container nginx from mypod
-  $SELF mypod
+  # debug the primary (first) container in pod mypod
+  $SELF spy mypod
 
-  # debug container nginx from mypod
-  $SELF mypod -c nginx
+  # specify pod namespace
+  $SELF spy mypod -n default
 
-  # debug container nginx from mypod using busybox
-  $SELF mypod -c nginx --spy-image busybox
+  # specify debugee container
+  $SELF spy mypod -c mycontainer
 
-  # debug container nginx from mypod using busybox with specified entrypoint
-  $SELF mypod -c nginx --spy-image busybox --entrypoint /bin/sh
+  # specify spy-image
+  $SELF spy mypod --spy-image busybox
+
+  # specify entrypoint for interaction
+  $SELF spy mypod --entrypoint /bin/sh
+
+  # specify additional port to be exposed
+  $SELF spy mypod --p 2345
 
 EOF
 }
@@ -78,6 +84,11 @@ main() {
               ;;
           --spy-image)
               ep="$2"
+              shift
+              shift
+              ;;
+          -p | --port)
+              port="$2"
               shift
               shift
               ;;
@@ -156,8 +167,12 @@ main() {
 EOT
 )"
 
-  echo "loading spy pod..."
-  kubectl -n "${ns}" run --rm -i --tty --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}"
+  echo "loading spy pod ${spyid} ..."
+  if [[ "${port}" == "" ]]; then
+    kubectl -n "${ns}" run --rm -i --tty --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}"
+  else
+    kubectl -n "${ns}" run --rm -i --tty --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}" --port="${port}"
+  fi
 }
 
 main "$@"
