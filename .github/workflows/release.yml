@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: shellcheck
+        run: shellcheck kubespy
+      - name: tar
+        run: tar -czvf kubespy.tar.gz kubespy LICENSE
+      - name: release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "kubespy.tar.gz"
+          token: ${{ secrets.GITHUB_TOKEN }}
