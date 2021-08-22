@@ -1,0 +1,16 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: shellcheck
+        run: shellcheck kubespy
