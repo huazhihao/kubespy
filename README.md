@@ -5,7 +5,7 @@
 [![LICENSE](https://img.shields.io/github/license/huazhihao/kubespy.svg)](https://github.com/huazhihao/kubespy/blob/master/LICENSE)
 [![Releases](https://img.shields.io/github/v/release/huazhihao/kubespy.svg)](https://github.com/huazhihao/kubespy/releases)
 
-`kubespy` is a kubectl plugin to debug a running pod without any prerequisites. It creates a short-lived `spy container`, which contains all the required debugging tools, to "spy" the target container by joining its namespaces. So the target container image can keep clean without sacrificing the convenience for debugging on demond.
+`kubespy` is a kubectl plugin to debug a running pod. It creates a short-lived `spy container`, using specified image containing all the required debugging tools, to "spy" the target container by joining its OS namespaces. So the original target container image can keep clean without sacrificing the convenience for debugging on demand.
 
 `kubespy` is similar to [kubectl-debug](https://github.com/verb/kubectl-debug). In contrast to the latter, kubespy works without the EphemeralContainers feature which is an experimental alpha feature and needs to be activated per pod.
 
@@ -71,7 +71,7 @@ worker node:   kubelet
                     | create
                     v
                spy container
-                    | join namespace: pid/net/ipc/mount/uts
+                    | join namespace: pid/net/ipc/mount
                     v
                target container
 ```
