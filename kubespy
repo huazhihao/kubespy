@@ -33,7 +33,7 @@ kubespy is a pod debugging tool for kubernetes clusters with docker runtimes
 
 Usage:
 
-  $SELF [-c CONTAINER] [-n NAMESPACE] [--spy-image IMAGE] [-p PORT] POD
+  $SELF [-c CONTAINER] [-n NAMESPACE] [--spy-image IMAGE] POD
 
 Examples:
 
@@ -51,9 +51,6 @@ Examples:
 
   # specify entrypoint for interaction
   $SELF spy mypod --entrypoint /bin/sh
-
-  # specify additional port to be exposed
-  $SELF spy mypod -p 2345
 
 EOF
 }
@@ -84,11 +81,6 @@ main() {
               ;;
           --spy-image)
               ep="$2"
-              shift
-              shift
-              ;;
-          -p | --port)
-              port="$2"
               shift
               shift
               ;;
@@ -168,11 +160,7 @@ EOT
 )"
 
   echo "loading spy pod ${spyid} ..."
-  if [[ "${port}" == "" ]]; then
-    kubectl -n "${ns}" run --rm -i --tty --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}"
-  else
-    kubectl -n "${ns}" run --rm -i --tty --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}" --port="${port}"
-  fi
+  kubectl -n "${ns}" run --rm -i --tty --image="docker.io/busybox:latest" --overrides="${overrides}" --restart=Never "${spyid}" -- "${entrypnt}"
 }
 
 main "$@"
